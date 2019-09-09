@@ -1,7 +1,17 @@
-function repo(org, name) {
+
+
+async function repo({org, name}) {
   return {
-    org: 'trieloff',
-    name: 'helix-demo'
+    org,
+    name,
+    contents: ({ref}) => {
+      console.log(ref);
+      return [
+        {
+          path: ref + 'README.md',
+        }
+      ]
+    }
   }
 }
 

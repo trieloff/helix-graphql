@@ -5,7 +5,7 @@ type Query {
 type Repo {
   org: String
   name: String
-  contents(ref: String): [Resource]
+  contents(ref: String!): [Resource]
 }
 
 enum Type {
