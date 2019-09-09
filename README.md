@@ -1,6 +1,6 @@
-# Helix Library
+# Helix GraphQL
 
-> An example library to be used in and with Project Helix
+> An experimental GraphQL representation of the GitHub Content Repository for Project helix
 
 ## Status
 [![codecov](https://img.shields.io/codecov/c/github/adobe/helix-library.svg)](https://codecov.io/gh/adobe/helix-library)
@@ -10,32 +10,117 @@
 [![LGTM Code Quality Grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/adobe/helix-library.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/adobe/helix-library)
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release) [![Greenkeeper badge](https://badges.greenkeeper.io/adobe/helix-library.svg)](https://greenkeeper.io/)
 
-## Installation
+This thing is a very experimental proof of concept. Be surprised if it runs. Be more surprised if it doesn't burn down your house.
 
-```bash
-$ npm install -S @adobe/helix-library
-```
-
-## Usage
-
-See the [API documentation](docs/API.md).
-
-## Development
-
-### Build
+## Usage (Local)
 
 ```bash
 $ npm install
+$ npx autographql dev -c autographql.json
 ```
 
-### Test
+You can then run GraphQL queries against `http://localhost:8080`. For example:
 
-```bash
-$ npm test
+```graphql
+query {
+  repo(owner: "trieloff", repo: "helix-demo") {
+    owner,
+    name,
+    contents(ref: "master", path: "", match: "*.md") {
+      path,
+      name,
+      document {
+        description,
+        title,
+        images
+      }
+    }
+  }
+}
+
 ```
 
-### Lint
+will yield:
 
-```bash
-$ npm run lint
+```json
+{
+  "errors": [
+    {
+      "message": "invalid json response body at https://adobeioruntime.net/api/v1/web/helix-pages/dynamic%40v1/idx_json?owner=trieloff&repo=helix-demo&ref=master&path=foo.md reason: Unexpected end of JSON input",
+      "locations": [
+        {
+          "line": 8,
+          "column": 7
+        }
+      ],
+      "path": [
+        "repo",
+        "contents",
+        0,
+        "document"
+      ]
+    }
+  ],
+  "data": {
+    "repo": {
+      "owner": "trieloff",
+      "name": "helix-demo",
+      "contents": [
+        {
+          "path": "foo.md",
+          "name": "foo.md",
+          "document": null
+        },
+        {
+          "path": "index.md",
+          "name": "index.md",
+          "document": {
+            "description": null,
+            "title": "Helix - demo",
+            "images": [
+              "/content/dam/udp/language-masters/en/home_callout01.jpg.img.jpg",
+              "htdocs/big-image.jpg"
+            ]
+          }
+        },
+        {
+          "path": "more.md",
+          "name": "more.md",
+          "document": {
+            "description": null,
+            "title": "More?",
+            "images": []
+          }
+        },
+        {
+          "path": "schwupp.md",
+          "name": "schwupp.md",
+          "document": {
+            "description": null,
+            "title": null,
+            "images": []
+          }
+        }
+      ]
+    }
+  }
+}
 ```
+
+### What Happens Here?
+
+The Helix GraphQL service combines the results of two API calls:
+
+1. the GitHub REST API to retrieve files in a folder of a GitHub repo (at a particular `ref`)
+2. the Helix Pages Index API to extract some metadata
+
+## Improvements Wanted/Needed
+
+- [ ] deploy to Adobe I/O Runtime
+- [ ] use local caching for Index API
+- [ ] use Fastly caching for Index API
+- [ ] use `helix-resolve-git-ref` instead of named refs
+- [ ] expose Sections in schema and response
+- [ ] enable recursive file listing
+- [ ] provide better filters
+- [ ] Use [`delegateToSchema`](https://www.apollographql.com/docs/graphql-tools/schema-delegation/#delegatetoschema) and wrap the GitHub GraphQL API
