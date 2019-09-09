@@ -18,4 +18,11 @@ type Resource {
   name: String
   type: Type
   ref: String
+  document: Document
+}
+
+type Document {
+  title: String
+  description: String
+  images: [String]
 }
