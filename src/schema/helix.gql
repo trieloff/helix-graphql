@@ -1,11 +1,11 @@
 type Query {
-  repo(org: String!, name: String!): Repo
+  repo(owner: String!, repo: String!): Repo
 }
 
 type Repo {
-  org: String
+  owner: String
   name: String
-  contents(ref: String!): [Resource]
+  contents(ref: String!, path: String, match: String): [Resource]
 }
 
 enum Type {
@@ -15,5 +15,7 @@ enum Type {
 
 type Resource {
   path: String
+  name: String
   type: Type
+  ref: String
 }
