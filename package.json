@@ -1,5 +1,5 @@
 {
-  "name": "@adobe/helix-library",
+  "name": "@adobe/helix-graphql",
   "version": "0.0.1",
   "description": "Example Package",
   "main": "src/index.js",
@@ -33,6 +33,7 @@
     "@semantic-release/npm": "^5.1.13",
     "@semantic-release/release-notes-generator": "^7.3.0",
     "ajv": "^6.10.2",
+    "autographql": "^0.1.27",
     "codecov": "^3.5.0",
     "commitizen": "^4.0.3",
     "cz-conventional-changelog": "^3.0.2",

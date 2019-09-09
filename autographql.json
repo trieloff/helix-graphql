@@ -1,0 +1,24 @@
+{
+  "name": "helix-graphql",
+  "root": "./",
+  "schema": "./src/schema/helix.gql",
+  "resolvers": "./src/resolvers/index.mjs",
+  "openid": {
+      "jwksUri": "https://senzo.eu.auth0.com/.well-known/jwks.json"
+  },
+  "external": [
+      "package.json",
+      "data"
+  ],
+  "rollup": {},
+  "babel": {},
+  "functions": [
+      {
+          "provider": "ibm",
+          "dist": "./dist/ibm"
+      }
+  ],
+  "dev": {
+      "port": 7000
+  }
+}

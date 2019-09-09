@@ -1,0 +1,19 @@
+type Query {
+  repo(org: String!, name: String!): Repo
+}
+
+type Repo {
+  org: String
+  name: String
+  contents(ref: String): [Resource]
+}
+
+enum Type {
+  FOLDER
+  FILE
+}
+
+type Resource {
+  path: String
+  type: Type
+}
