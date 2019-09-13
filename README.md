@@ -121,6 +121,7 @@ The Helix GraphQL service combines the results of two API calls:
 - [ ] use Fastly caching for Index API
 - [ ] use `helix-resolve-git-ref` instead of named refs
 - [ ] expose Sections in schema and response
-- [ ] enable recursive file listing
+- [x] enable recursive file listing
+- [ ] enable authenticated requests
 - [ ] provide better filters
 - [ ] Use [`delegateToSchema`](https://www.apollographql.com/docs/graphql-tools/schema-delegation/#delegatetoschema) and wrap the GitHub GraphQL API
