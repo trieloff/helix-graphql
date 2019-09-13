@@ -13,31 +13,41 @@ function document(owner, repo, ref, name) {
   }
 }
 
-async function fetchdir(url, depth = 0) {
-  const contents = await fetch(url).then(res => res.json());
-  console.log(url, depth, contents);
-  const folders = contents.filter(({ type}) => type === 'dir');
-  const files = contents.filter(({ type}) => type === 'file');
+async function fetchdir(url, depth = 0, authorization) {
+  const contents = await fetch(url, {
+    headers: {
+      authorization
+    }
+  }).then(res => res.json());
+  console.log(url, depth, authorization);
+  try {
+    const folders = contents.filter(({ type}) => type === 'dir');
+    const files = contents.filter(({ type}) => type === 'file');
 
-  if (depth > 0 && folders.length > 0) {
-    const jobs = folders.map(({_links}) => fetchdir(_links.self, depth - 1));
-    const subfiles = await Promise.all(jobs);
-    return subfiles.reduce((p, v) => {
-      return [...p, ...v];
-    }, files);
-  }
-  
-  return files;
+    if (depth > 0 && folders.length > 0) {
+      const jobs = folders.map(({_links}) => fetchdir(_links.self, depth - 1, authorization));
+      const subfiles = await Promise.all(jobs);
+      return subfiles.reduce((p, v) => {
+        return [...p, ...v];
+      }, files);
+    }
+    
+    return files;
+} catch (e) {
+  console.error(e);
+  return [];
+}
 }
 
-async function repo({owner, repo}) {
+async function repo({owner, repo}, context) {
+  console.log(context.req.headers);
   return {
     owner,
     name: repo,
     contents: ({ref = 'master', path = '', match = '*', depth = 0}) => {
       try {
 
-        return fetchdir(`https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${ref}`, depth)
+        return fetchdir(`https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${ref}`, depth, context.req.headers.authorization)
           //.then(res => res.json())
           .then(res => res.filter(({name}) => minimatch(name, match)))
           .then(res => res.map(content => {
