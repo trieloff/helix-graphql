@@ -2,66 +2,72 @@ import fetch from "node-fetch";
 import minimatch from "minimatch";
 
 function document(owner, repo, ref, name) {
-  return async (e) => {
-    console.log('fetching metadata', e, `https://adobeioruntime.net/api/v1/web/helix-pages/dynamic%40v1/idx_json?owner=${owner}&repo=${repo}&ref=${ref}&path=${name}`);
-    return fetch(`https://adobeioruntime.net/api/v1/web/helix-pages/dynamic%40v1/idx_json?owner=${owner}&repo=${repo}&ref=${ref}&path=${name}`)
+  return async e => {
+    console.log(
+      "fetching metadata",
+      e,
+      `https://adobeioruntime.net/api/v1/web/helix-pages/dynamic%40v1/idx_json?owner=${owner}&repo=${repo}&ref=${ref}&path=${name}`
+    );
+    return fetch(
+      `https://adobeioruntime.net/api/v1/web/helix-pages/dynamic%40v1/idx_json?owner=${owner}&repo=${repo}&ref=${ref}&path=${name}`
+    )
       .then(res => res.json())
       .then(res => ({
         ...res.basic.entries,
         ...res.images.entries
       }));
-  }
+  };
 }
 
-async function fetchdir(url, depth = 0, authorization) {
-  const contents = await fetch(url, {
-    headers: {
-      authorization
-    }
-  }).then(res => res.json());
-  console.log(url, depth, authorization);
-  try {
-    const folders = contents.filter(({ type}) => type === 'dir');
-    const files = contents.filter(({ type}) => type === 'file');
-
-    if (depth > 0 && folders.length > 0) {
-      const jobs = folders.map(({_links}) => fetchdir(_links.self, depth - 1, authorization));
-      const subfiles = await Promise.all(jobs);
-      return subfiles.reduce((p, v) => {
-        return [...p, ...v];
-      }, files);
-    }
-    
-    return files;
-} catch (e) {
-  console.error(e);
-  return [];
-}
-}
-
-async function repo({owner, repo}, context) {
-  console.log(context.req.headers);
+async function repo({ owner, repo }, context) {
+  const headers = context.req.headers.authorization ? {
+    'x-github-token': context.req.headers.authorization.split(' ')[1]
+  } : undefined;
   return {
     owner,
     name: repo,
-    contents: ({ref = 'master', path = '', match = '*', depth = 0}) => {
+    contents: ({ ref = "master", path = "", match = "*", depth = 0 }) => {
       try {
+        return fetch(
+          `https://adobeioruntime.net/api/v1/web/helix/helix-services/resolve-git-ref@v1?owner=${owner}&repo=${repo}&ref=${ref}`,
+          {
+            headers
+          }
+        )
+          .then(res => res.json())
+          .then(res => res.sha)
+          .then(sha => {
+            const url = `https://api.github.com/repos/${owner}/${repo}/git/trees/${sha}?recursive=1`;
+            console.log("sha", sha, url);
 
-        return fetchdir(`https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${ref}`, depth, context.req.headers.authorization)
-          //.then(res => res.json())
-          .then(res => res.filter(({name}) => minimatch(name, match)))
-          .then(res => res.map(content => {
-            content.document = document(owner, repo, ref, content.path);
-            return content;
-          }));
+            return fetch(url, {
+              headers: {
+                authorization: context.req.headers.authorization
+              }
+            })
+              .then(res => res.json())
+              .then(res => {
+                console.log(res);
+                return res;
+              })
+              .then(res => res.tree)
+              .then(res => res.filter(({ type }) => type === "blob"))
+              .then(res => res.filter(({ path }) => minimatch(path, match)))
+              .then(res =>
+                res.map(content => {
+                  content.document = document(owner, repo, ref, content.path);
+                  return content;
+                })
+              );
+          });
       } catch (e) {
         console.error(e);
         return [];
       }
     }
-  }
+  };
 }
 
 export default {
-  repo, fetchdir
-}
+  repo
+};
