@@ -9,7 +9,7 @@ enum Type {
 type Repo {
   owner: String
   name: String
-  contents(ref: String!, path: String, match: String, depth: Int): [Resource]
+  contents(ref: String!, parent: String, type: String): [Resource]
 }
 
 type Resource {

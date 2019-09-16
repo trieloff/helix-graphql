@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/adobe/helix-library#readme",
   "dependencies": {
+    "algoliasearch": "^3.34.0",
     "node-fetch": "^2.6.0"
   },
   "devDependencies": {
