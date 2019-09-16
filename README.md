@@ -26,7 +26,7 @@ query {
   repo(owner: "trieloff", repo: "helix-demo") {
     owner,
     name,
-    contents(ref: "master", path: "", match: "*.md") {
+    contents(ref: "master", parent: "", type: "md") {
       path,
       name,
       document {
@@ -123,5 +123,5 @@ The Helix GraphQL service combines the results of two API calls:
 - [ ] expose Sections in schema and response
 - [x] enable recursive file listing
 - [x] enable authenticated requests
-- [ ] provide better filters
+- [x] provide better filters
 - [ ] Use [`delegateToSchema`](https://www.apollographql.com/docs/graphql-tools/schema-delegation/#delegatetoschema) and wrap the GitHub GraphQL API
