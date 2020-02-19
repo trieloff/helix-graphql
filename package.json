@@ -36,7 +36,7 @@
     "@semantic-release/release-notes-generator": "^7.3.0",
     "ajv": "^6.10.2",
     "autographql": "^0.1.27",
-    "codecov": "^3.5.0",
+    "codecov": "^3.6.5",
     "commitizen": "^4.0.3",
     "cz-conventional-changelog": "^3.0.2",
     "eslint": "^6.1.0",
